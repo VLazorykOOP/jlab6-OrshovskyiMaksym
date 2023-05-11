@@ -1,0 +1,90 @@
+import javax.swing.*;
+import java.awt.*;
+import java.awt.event.*;
+
+public class SpeedControl extends JFrame implements ActionListener {
+    private JButton increaseButton, decreaseButton;
+    private JLabel speedLabel;
+    private int speed = 0;
+    private int directionX = -1; // напрямок руху по осі X - вліво (-1) або вправо (1)
+    private int directionY = -1; // напрямок руху по осі Y - вверх (-1) або вниз (1)
+    private int x = 100; // початкова координата x
+    private int y = 100; // початкова координата y
+    private final int DELAY = 20; // затримка анімації в мілісекундах
+    private Timer timer; // таймер для оновлення координат
+
+    public SpeedControl() {
+        setTitle("Speed Control");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Створюємо елементи інтерфейсу користувача
+        JPanel panel = new JPanel();
+        increaseButton = new JButton("Increase Speed");
+        decreaseButton = new JButton("Decrease Speed");
+        speedLabel = new JLabel("Current Speed: " + speed);
+
+        // Додаємо елементи на панель
+        panel.add(increaseButton);
+        panel.add(decreaseButton);
+        panel.add(speedLabel);
+
+        // Додаємо панель до вікна
+        getContentPane().add(panel);
+
+        // Додаємо обробник подій до кнопок
+        increaseButton.addActionListener(this);
+        decreaseButton.addActionListener(this);
+
+        // Створюємо таймер та додаємо обробник подій
+        timer = new Timer(DELAY, new ActionListener() {
+            public void actionPerformed(ActionEvent e) {
+                // зміщуємо координати точки
+                x += directionX * speed;
+                y += directionY * speed;
+                // якщо точка досягла лівого або правого краю, змінюємо напрямок руху по осі X
+                if (x < 0 || x > getWidth()) {
+                    directionX *= -1;
+                }
+                // якщо точка досягла верхнього або нижнього краю, змінюємо напрямок руху по осі Y
+                if (y < 0 || y > getHeight()) {
+                    directionY *= -1;
+                }
+                repaint(); // оновлюємо відображення
+            }
+        });
+
+        // Відображаємо вікно
+        pack();
+        setVisible(true);
+
+        // Запускаємо таймер
+        timer.start();
+    }
+
+    // Обробник подій для кнопок
+    public void actionPerformed(ActionEvent event) {
+        if (event.getSource() == increaseButton) {
+            speed += 5; // збільшуємо швидкість на 5
+            speedLabel.setText("Current Speed: " + speed); // оновлюємо текст мітки
+        }
+
+        // Обробка події для кнопки зменшення швидкості
+        if (event.getSource() == decreaseButton) {
+            speed -= 5; // зменшуємо швидкість на 5
+            if (speed < 0) {
+                speed = 0; // не дозволяємо швидкості стати від'ємною
+            }
+            speedLabel.setText("Current Speed: " + speed); // оновлюємо текст мітки
+        }
+    }
+
+    public void paint(Graphics g) {
+        super.paint(g);
+        g.fillOval(x, y, 20, 20); // малюємо точку
+    }
+
+    public static void main(String[] args) {
+        SpeedControl app = new SpeedControl();
+    }
+}
+
