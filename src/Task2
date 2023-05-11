@@ -1,0 +1,114 @@
+import javax.swing.*;
+import javax.swing.table.DefaultTableModel;
+import java.awt.*;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.util.Scanner;
+
+public class MainFrame extends JFrame implements ActionListener {
+    private JButton calculateButton;
+    private JLabel maxLabel, resultLabel;
+    private JTextField nField;
+    private JTable table;
+
+    public MainFrame() {
+        setTitle("Max and Sum");
+        setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+
+        // Create components
+        JPanel panel = new JPanel(new BorderLayout());
+        JPanel inputPanel = new JPanel(new GridLayout(2, 2));
+
+        calculateButton = new JButton("Обчислити");
+        calculateButton.addActionListener(this);
+
+        inputPanel.add(new JLabel());
+        inputPanel.add(calculateButton);
+
+        maxLabel = new JLabel("Max element: ");
+        resultLabel = new JLabel("Result: ");
+
+        panel.add(inputPanel, BorderLayout.NORTH);
+        panel.add(maxLabel, BorderLayout.WEST);
+        panel.add(resultLabel, BorderLayout.SOUTH);
+
+        // Create table
+        String[] columnNames = new String[15];
+        for (int i = 0; i < 15; i++) {
+            columnNames[i] = "" + i;
+        }
+        DefaultTableModel model = new DefaultTableModel(columnNames, 0);
+        table = new JTable(model);
+
+        JScrollPane scrollPane = new JScrollPane(table);
+        panel.add(scrollPane, BorderLayout.CENTER);
+
+        // Add panel to frame
+        getContentPane().add(panel);
+
+        // Show frame
+        pack();
+        setVisible(true);
+    }
+
+    public void actionPerformed(ActionEvent e) {
+        // Read input from file
+        int[][] A = new int[15][15];
+        int n = 0;
+        try {
+            File file = new File("input.txt");
+            Scanner scan = new Scanner(file);
+            n = scan.nextInt();
+            for (int i = 0; i < n; i++) {
+                for (int j = 0; j < n; j++) {
+                    A[i][j] = scan.nextInt();
+                }
+            }
+        } catch (FileNotFoundException ex) {
+            ex.printStackTrace();
+        }
+
+        // Display table
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(n);
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                model.setValueAt(A[i][j], i, j);
+            }
+        }
+
+        // Find max element
+        int max = 0;
+        for (int i = 1; i < n; i++) {
+            for (int j = 0; j < i; j++) {
+                if (max < A[i][j]) {
+                    max = A[i][j];
+                }
+            }
+        }
+
+        maxLabel.setText("Max element: " + max);
+
+        // Calculate sum of elements greater than max
+        int res = 0;
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                if (A[i][j] > max) {
+                    res += A[i][j];
+                }
+            }
+        }
+
+        if (res == 0) {
+            resultLabel.setText("No element more than MAX!");
+        } else {
+            resultLabel.setText("Result: " + res);
+        }
+    }
+
+    public static void main(String[] args) {
+        MainFrame frame = new MainFrame();
+    }
+}
