@@ -8,7 +8,7 @@ import java.io.FileNotFoundException;
 import java.util.Scanner;
 
 public class MainFrame extends JFrame implements ActionListener {
-    private JButton calculateButton;
+    private JButton calculateButton, fillButton, clearButton;
     private JLabel maxLabel, resultLabel;
     private JTextField nField;
     private JTable table;
@@ -21,11 +21,18 @@ public class MainFrame extends JFrame implements ActionListener {
         JPanel panel = new JPanel(new BorderLayout());
         JPanel inputPanel = new JPanel(new GridLayout(2, 2));
 
-        calculateButton = new JButton("Обчислити");
+        calculateButton = new JButton("Calculate");
         calculateButton.addActionListener(this);
 
-        inputPanel.add(new JLabel());
+        fillButton = new JButton("Fill");
+        fillButton.addActionListener(this);
+
+        clearButton = new JButton("Clear");
+        clearButton.addActionListener(this);
+
+        inputPanel.add(fillButton);
         inputPanel.add(calculateButton);
+        inputPanel.add(clearButton);
 
         maxLabel = new JLabel("Max element: ");
         resultLabel = new JLabel("Result: ");
@@ -54,6 +61,16 @@ public class MainFrame extends JFrame implements ActionListener {
     }
 
     public void actionPerformed(ActionEvent e) {
+        if (e.getSource() == calculateButton) {
+            calculate();
+        } else if (e.getSource() == fillButton) {
+            fill();
+        } else if (e.getSource() == clearButton) {
+            clear();
+        }
+    }
+
+    private void fill() {
         // Read input from file
         int[][] A = new int[15][15];
         int n = 0;
@@ -78,34 +95,42 @@ public class MainFrame extends JFrame implements ActionListener {
                 model.setValueAt(A[i][j], i, j);
             }
         }
+    }
 
-        // Find max element
-        int max = 0;
-        for (int i = 1; i < n; i++) {
-            for (int j = 0; j < i; j++) {
-                if (max < A[i][j]) {
-                    max = A[i][j];
-                }
+    private void clear() {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        model.setRowCount(0);
+        maxLabel.setText("Max element: ");
+        resultLabel.setText("Result: ");
+    }
+
+    private void calculate() {
+        DefaultTableModel model = (DefaultTableModel) table.getModel();
+        int n = model.getRowCount();
+        int[][] A = new int[n][n];
+
+        // Fill array with table data
+        for (int i = 0; i < n; i++) {
+            for (int j = 0; j < n; j++) {
+                A[i][j] = Integer.parseInt(model.getValueAt(i, j).toString());
             }
         }
 
-        maxLabel.setText("Max element: " + max);
-
-        // Calculate sum of elements greater than max
-        int res = 0;
+        // Calculate max element and sum
+        int max = A[0][0];
+        int sum = 0;
         for (int i = 0; i < n; i++) {
             for (int j = 0; j < n; j++) {
                 if (A[i][j] > max) {
-                    res += A[i][j];
+                    max = A[i][j];
                 }
+                sum += A[i][j];
             }
         }
 
-        if (res == 0) {
-            resultLabel.setText("No element more than MAX!");
-        } else {
-            resultLabel.setText("Result: " + res);
-        }
+        // Display result
+        maxLabel.setText("Max element: " + max);
+        resultLabel.setText("Result: " + sum);
     }
 
     public static void main(String[] args) {
